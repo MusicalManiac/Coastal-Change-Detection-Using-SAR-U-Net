@@ -15,7 +15,7 @@ than safety certification.
 | Person  | Focus                                                      | Docs |
 |---------|--------------------------------------------------------------|------|
 | Nisheeth | Global cyclone event investigation, data sufficiency, risk analysis | `docs/risk-analysis.md` |
-| Rata    | Ground-truth/reference data, literature synthesis            | `docs/literature-review.md` |
+| Rata    | Ground-truth/reference data, literature synthesis, presentation & reporting organization            | `docs/literature-review.md` |
 | Seb     | NZ regional event investigation (GEE), design-process doc     | `docs/design-process.md` |
 | Rhett   | Product concept, demo, extensions                             | `docs/product-concept.md` |
 
