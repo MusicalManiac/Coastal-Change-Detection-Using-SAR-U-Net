@@ -20,7 +20,7 @@ than safety certification.
 | Rhett   | Product concept, demo, extensions                             | `docs/product-concept.md` |
 
 ## Approach
-- **Training data**: [Kuro Siwo](https://github.com/Orion-AI-Lab/KuroSiwo) — 43 global flood events, multi-temporal Sentinel-1 (2 pre + 1 post per event), used via their existing U-Net training pipeline rather than building one from scratch.
+- **Training data**: [Kuro Siwo](https://github.com/Orion-AI-Lab/KuroSiwo) — 45 global flood events (per the repo's `catalogue.yaml`; the paper cites 43, likely a minor version difference), multi-temporal Sentinel-1 (2 pre + 1 post per event), used via their existing U-Net training pipeline rather than building one from scratch. Of these 45, roughly 4 are cyclone-caused (Hurricane Harvey, Typhoon Vamco, Cyclone Ana); the rest are river/monsoon/frontal floods.
 - **Test/validation event**: Cyclone Idai, Beira, Mozambique (March 2019) — chosen for confirmed clean pre/post Sentinel-1 coverage and independent reference data (Copernicus EMS EMSR348 delineation maps).
 - **NZ case study**: Cyclone Gabrielle, Hawke's Bay (Feb 2023) — included for operational relevance and as a documented example of real-world data-availability constraints (thin pre-event baseline due to single-satellite Sentinel-1 coverage since Sentinel-1B's 2021 failure).
 
@@ -36,3 +36,5 @@ cd external/KuroSiwo && pip install -r requirements.txt
 
 ## Status
 Currently in Week 1 of 3: data pipeline and training setup.
+MVP: training U-Net on all 45 events as a general flood-detection baseline.
+Next: evaluate cyclone-subset performance separately, then iterate toward cyclone-specific refinement and unseen-event testing (Cyclone Idai / Gabrielle).
