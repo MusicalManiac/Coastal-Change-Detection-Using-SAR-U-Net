@@ -1,0 +1,6 @@
+# Data files
+data/dataset_patches
+data/CycloneGabrielle_HawkesBay_S1_Stack.tif
+
+# Miscellaneous
+.DS_Store
