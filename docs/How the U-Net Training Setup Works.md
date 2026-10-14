@@ -18,7 +18,7 @@ The last recorded run reached a test flood IoU of 0.927. Read the caveat under E
 
 ## Data inputs
 
-The notebook reads 893 ready-made patches from `dataset_patches/`; it does no preprocessing of its own. Each patch is a pair of `.npy` files with the same name, one under `images/` and one under `masks/`.
+The notebook reads 893 ready-made patches from `data/processed/dataset_patches/`; it does no preprocessing of its own. Each patch is a pair of `.npy` files with the same name, one under `images/` and one under `masks/`.
 
 |  | Image | Mask |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ The notebook reads 893 ready-made patches from `dataset_patches/`; it does no pr
 | Type | float32, already normalised | uint8, 1 = flooded, 0 = not |
 | Contents | `pre_vv`, `pre_vh`, `post_vv`, `post_vh` | `baseline_mask` |
 
-The four image channels are Sentinel-1 backscatter in two polarisations (VV and VH), before and after the event. At 10 m per pixel, one patch covers 2.56 km × 2.56 km. The source scene is `CycloneGabrielle_HawkesBay_S1_Stack_v2.tif`.
+The four image channels are Sentinel-1 backscatter in two polarisations (VV and VH), before and after the event. At 10 m per pixel, one patch covers 2.56 km × 2.56 km. The source scene is `data/raw/CycloneGabrielle_HawkesBay_S1_Stack_v2.tif`.
 
 ### Splits
 
@@ -102,7 +102,7 @@ On a GPU the forward pass uses mixed precision, which is faster and uses less me
 
 1. One pass over the training set with augmentation, updating the weights.
 2. One pass over the validation set with no weight updates.
-3. If validation IoU beat the previous best, the model is saved to `unet_best.pt`, overwriting the last save.
+3. If validation IoU beat the previous best, the model is saved to `models/checkpoints/unet_best.pt`, overwriting the last save.
 4. One line is printed with train loss and IoU, and validation loss, IoU, precision and recall.
 
 The saved model is therefore the best one by validation IoU, not the one from the final epoch.
@@ -145,7 +145,7 @@ Proving the model finds real floods needs labels made independently of the radar
 
 | File | Contents |
 | --- | --- |
-| `unet_best.pt` | Best model weights, plus the encoder name, channel names, normalisation values, threshold, epoch and validation IoU |
+| `models/checkpoints/unet_best.pt` | Best model weights, plus the encoder name, channel names, normalisation values, threshold, epoch and validation IoU |
 | `training_curves.png` | Loss and flood IoU per epoch, train against validation |
 | `test_predictions.png` | The 4 most-flooded test patches: after-event VV image, label, and prediction side by side |
 
@@ -156,9 +156,9 @@ The checkpoint carries the normalisation values on purpose. Anyone running the m
 The notebook is written for Google Colab and runs top to bottom with no manual steps between cells.
 
 1. Open `models/unet_training.ipynb` in Colab and switch to a GPU runtime (Runtime > Change runtime type > GPU).
-2. Get `dataset_patches/` onto the runtime. Either run `data/data_preprocessing.ipynb` in the same session or upload the folder. It must contain `train/`, `val/`, `test/` and `dataset_info.json`.
+2. Get `dataset_patches/` onto the runtime. Either run `notebooks/data_preprocessing.ipynb` in the same session or upload the folder. It must contain `train/`, `val/`, `test/` and `dataset_info.json`.
 3. Run all cells. The first one installs `segmentation-models-pytorch`.
-4. Download `unet_best.pt` and the two PNGs when it finishes.
+4. Download `unet_best.pt` and the two PNGs when it finishes. Locally, keep them in `models/checkpoints/` and `outputs/`.
 
 ### Things to watch out for
 

@@ -1,6 +1,10 @@
-# Data files
-data/dataset_patches
-data/*.tif
+# Generated training data and downloaded archives
+data/processed/
+data/archives/
+
+# Generated evaluation outputs
+outputs/
 
 # Miscellaneous
 .DS_Store
+__pycache__/
