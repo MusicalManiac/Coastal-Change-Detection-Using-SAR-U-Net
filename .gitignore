@@ -4,3 +4,6 @@ data/*.tif
 
 # Miscellaneous
 .DS_Store
+
+# Model outputs
+models/outputs
