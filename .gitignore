@@ -7,3 +7,4 @@ data/*.tif
 
 # Model outputs
 models/outputs
+models/__pycache__/encoder_comparison.cpython-311.pyc
