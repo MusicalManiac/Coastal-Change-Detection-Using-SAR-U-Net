@@ -1,6 +1,8 @@
 # Data files
 data/dataset_patches
 data/*.tif
+data/linz/*
+data/reference/*
 
 # Miscellaneous
 .DS_Store
