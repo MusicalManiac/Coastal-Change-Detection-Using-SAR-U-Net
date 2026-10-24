@@ -1,8 +1,8 @@
 # Data files
 data/dataset_patches
 data/*.tif
-data/linz/*
-data/reference/*
+data/linz/lds-nz-road-centrelines-topo-150k-SHP
+data/reference/Hawke_s_Bay_Flood_Observation_Extents
 
 # Miscellaneous
 .DS_Store
