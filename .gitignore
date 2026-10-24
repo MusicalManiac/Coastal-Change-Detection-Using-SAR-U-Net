@@ -1,6 +1,15 @@
 # Data files
 data/dataset_patches
 data/*.tif
+data/linz/lds-nz-road-centrelines-topo-150k-SHP
+data/reference/Hawke_s_Bay_Flood_Observation_Extents
 
 # Miscellaneous
 .DS_Store
+
+# Model outputs
+models/outputs
+models/__pycache__/encoder_comparison.cpython-311.pyc
+
+# Figures
+figures

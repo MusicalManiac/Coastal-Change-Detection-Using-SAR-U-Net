@@ -11,8 +11,10 @@
 
 | Event Name | Region | Event Date | Pre-Event S1 Scene | Post-Event S1 Scene | Local Timestamp (NZDT) | Orbit Pass | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Cyclone Gabrielle** | Hawke's Bay | Feb 14, 2023 | 2023-02-01 17:30 UTC | 2023-02-13 17:30 UTC | Feb 14, 06:30 AM NZDT | Descending | **PASS** (Matched orbit, peak landfall) |
+| **Cyclone Gabrielle** | Hawke's Bay | Feb 14, 2023 | 2023-01-21 07:07 UTC | 2023-02-14 07:07 UTC | Feb 14, 08:07 PM NZDT | Ascending (relative orbit 81) | **PASS** (Same orbit, 100% AOI coverage, during peak flooding) |
 | **Cyclone Idai** | Beira, Mozambique | Mar 14, 2019 | TBC (Nisheeth) | TBC – closest to 2019-03-16 14:41 UTC | — | TBC | **Test event** (EMS reference: EMSR348 AOI03) |
+
+**Change from original plan (Gabrielle):** the descending pass (relative orbit 73, 1 and 13 Feb) covered only about 91% of the area of interest, so `data_collection.ipynb` uses the ascending pass on relative orbit 81 instead. Each pass is delivered as two GRD slices, which are mosaicked to cover the full area.
 
 ---
 
@@ -78,10 +80,25 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 
 ## 4. Data Processing Architecture
 
-[ Sentinel-1 GRD Data ] ---> [ Speckle Filter & Terrain Correction ] ---> [ Co-Registered Pre/Post Stack ]
-|
-v
-[ Client Vector Outputs ] <--- [ Binary Mask Post-Processing ] <--- [ U-Net Inference Engine ]
+```
+[ Sentinel-1 GRD, Google Earth Engine ] --> [ 30 m speckle smoothing, pre/post VV + VH stack ] --> [ GeoTIFF ]
+  notebooks/data_collection.ipynb                                                                     |
+                                                                                                      v
+[ 256 x 256 patches, spatial block split, train-only normalisation ] <-- notebooks/data_preprocessing.ipynb
+        |
+        v
+[ U-Net training & test scoring ] --> [ Full-scene inference ] --> [ Flood polygons + flooded road segments ]
+  models/unet_training.ipynb            models/nzdf_flood_product.ipynb (GeoTIFF, GeoPackage, GeoJSON)
+```
+
+| Stage | Notebook | Runs on | Output |
+| :--- | :--- | :--- | :--- |
+| Data collection | `notebooks/data_collection.ipynb` | Colab | `CycloneGabrielle_HawkesBay_S1_Stack_v2.tif` on Google Drive |
+| Preprocessing | `notebooks/data_preprocessing.ipynb` | Colab | `dataset_patches/` on Google Drive (copied to `data/` for training) |
+| Data visualisation | `notebooks/data_visualisation.ipynb` | Local | Presentation figures in `notebooks/figures/` |
+| Training | `models/unet_training.ipynb` | Local GPU | `models/outputs/unet_best.pt` |
+| Encoder comparison | `models/encoder_comparison.ipynb` | Local GPU | `models/outputs/comparison/` |
+| NZDF product | `models/nzdf_flood_product.ipynb` | Local | `models/outputs/nzdf/` |
 
 ---
 
@@ -95,9 +112,77 @@ v
 - **Selected Sensor:** Sentinel-1 C-band SAR ($\text{VV} + \text{VH}$)
 - **Justification:** Active microwave sensor penetrates cloud cover, heavy rain, and operates day/night.
 
+### Training Labels
+- **Selected Method:** Pseudo-labels (`baseline_mask`): a pixel is flooded if VV backscatter dropped by more than 3.5 dB between the pre- and post-event images, excluding permanent water (JRC Global Surface Water occurrence > 80%).
+- **Justification:** No pixel-level ground truth exists for Gabrielle at the Sentinel-1 acquisition time, and the rule can be computed for the whole scene.
+- **Consequence:** The model's inputs include both VV images, so it can learn to rebuild the rule. High scores against these labels show the pipeline works; they do not show the model detects real flooding. Removing `vv_diff` from the inputs did not remove this leakage, because `pre_vv` and `post_vv` carry the same information.
+
+### Dataset Design
+- **Patches:** 256 × 256 pixels (2.56 km at 10 m), 50% overlap, inputs `pre_vv`, `pre_vh`, `post_vv`, `post_vh`.
+- **Spatial split:** the scene is cut into 512-pixel blocks and whole blocks go to one split (train 73 blocks / 623 patches, validation 16 / 141, test 15 / 129). Splitting patch by patch would put overlapping near-copies in both train and test.
+- **Flood balance:** block assignment was chosen so each split has a similar share of flooded pixels (1.47% / 1.36% / 1.46%).
+- **Normalisation:** per-channel mean and standard deviation from training pixels only, stored in `dataset_info.json` and in every checkpoint.
+
+### Training Configuration
+- **Architecture:** U-Net (`segmentation-models-pytorch`) with an ImageNet-pretrained encoder, 4 input channels, 1 output.
+- **Loss:** binary cross-entropy + Dice, to cope with only ~1.4% of pixels being flooded.
+- **Optimiser:** AdamW with a one-cycle learning-rate schedule (peak 1e-3), 60 epochs, batch size 16, flip and 90° rotation augmentation.
+- **Model selection:** checkpoint with the best validation IoU; the probability threshold is then tuned on validation (not test) and stored in the checkpoint.
+
 ---
 
-## 6. Team Task Log & Contributions
+## 6. Model Results — Cyclone Gabrielle (pseudo-labels)
+
+All scores are flood-class metrics on the held-out **test blocks**, measured against the threshold labels. They show how closely each method reproduces the labelling rule.
+
+**Main model** (`unet_training.ipynb`, ResNet-34, best epoch 51, threshold 0.30): test IoU **0.947**, precision 0.971, recall 0.974, F1 0.973.
+
+**Encoder comparison** (`encoder_comparison.ipynb`, same setup, 3 seeds each, mean ± std):
+
+| Method | IoU | Precision | Recall |
+| :--- | :--- | :--- | :--- |
+| U-Net, EfficientNet-B2 | 0.956 ± 0.001 | 0.976 ± 0.001 | 0.979 ± 0.001 |
+| U-Net, ResNet-18 | 0.954 ± 0.002 | 0.975 ± 0.001 | 0.978 ± 0.002 |
+| U-Net, ResNet-34 | 0.952 ± 0.002 | 0.977 ± 0.001 | 0.974 ± 0.001 |
+| Rule: VV drop > 3.5 dB (no permanent-water mask) | 0.570 | 0.570 | 1.000 |
+| Otsu threshold on `post_vv` | 0.050 | 0.051 | 0.840 |
+
+**Interpretation:**
+- The three encoders are within about two standard deviations of each other, so none is clearly better on these labels.
+- The U-Nets beat the plain rule mainly by also learning to leave out permanent water, which the labels exclude but the inputs do not mark.
+- Otsu scores low because it also marks the sea and rivers.
+- The comparison that matters is on independent labels (Idai EMS, Section 3, and the Gabrielle reference below). That test has not been run yet.
+
+---
+
+## 7. NZDF Decision Product & External Validation
+
+**Notebook:** `models/nzdf_flood_product.ipynb`
+
+1. **Full-scene inference:** predicts the whole 6667 × 4330 pixel Hawke's Bay scene with overlapping, blended 256-pixel windows. Outputs a flood probability GeoTIFF and a binary flood GeoTIFF (1 = flooded, 0 = dry, 255 = nodata).
+2. **Vectorisation & road overlay:** converts the flood map to polygons (dropping those under 1,000 m²) and intersects them with LINZ *NZ Road Centrelines (Topo, 1:50k)*. The result is the length and share of each road under water. Outputs are a GeoPackage in NZTM2000 (EPSG:2193) for QGIS, plus GeoJSON copies.
+3. **External validation:** scores both the U-Net and the threshold rule against an independent flood extent, over the whole scene and over the test blocks only. The U-Net adds value only if it beats the rule.
+
+**Reference data for Gabrielle:** no LINZ or Civil Defence flood boundary download was found. The closest official source is the Hawke's Bay Regional Council [Cyclone Gabrielle flooding map](https://hbrc.govt.nz/our-council/cyclone-gabrielle-response/cyclone-gabrielle-flooding), published February 2025. It has no public download; the GIS layer must be requested from HBRC (Engineering.Enquiries@hbrc.govt.nz).
+
+**Limitations of the HBRC map as ground truth:**
+- **Maximum extent, not a snapshot:** compiled from photos, video, satellite images, building inspections and ground contours over 13–15 February. Water that had drained or not yet arrived at the 14 Feb 07:07 UTC acquisition will count as model misses.
+- **Mapped area:** flooding outside the area HBRC mapped would count as false positives unless a mapped-area boundary is supplied.
+- **Method:** manually digitised, not derived from radar. This makes it more independent than the pseudo-labels, but its edges are less precise.
+
+---
+
+## 8. Open Questions & Next Steps
+
+- [ ] Request the Cyclone Gabrielle flood extent GIS layer from HBRC for external validation. (Sebastian)
+- [ ] Download LINZ road centrelines for Hawke's Bay and run the road overlay. (Sebastian)
+- [ ] Build `data/idai_patches/` (Sentinel-1 + EMS labels, normalised with the Gabrielle statistics) so `encoder_comparison.ipynb` can score every model on Idai. (Nisheeth / Rata)
+- [ ] Choose the final encoder once the Idai scores are in.
+- [ ] Decide whether to keep the pseudo-labels or retrain on independent labels, given the label leakage above.
+
+---
+
+## 9. Team Task Log & Contributions
 
 | Date | Contributor | Task / Component Completed | Notes / Blockers |
 | :--- | :--- | :--- | :--- |
@@ -105,3 +190,9 @@ v
 | YYYY-MM-DD | [Name] | Preprocessed Sentinel-1 imagery for Cyclone Gabrielle | Calibrated to $\sigma^0$ dB |
 | YYYY-MM-DD | [Name] | Established Otsu change-detection baseline | IoU baseline = X.XX |
 | 2026-10-05 | Rata | Sourced and processed reference flood data for Cyclone Idai (Copernicus EMS EMSR348, AOI03 Beira); notebook `01_reference_data.ipynb`, cleaned output `idai_beira_flood_reference.gpkg` | AOI16 has no flood delineation. Need S1 scene closest to 16 Mar 2019 and confirmation Idai isn't in Kuro Siwo training set |
+| 2026-10-05 | Sebastian | Preprocessing notebook: 256-pixel patches, spatial block split, train-only normalisation (`data_preprocessing.ipynb`) | Labels are the −3.5 dB rule, so scores on them measure rule-copying |
+| 2026-10-08 | Nisheeth | Added Gabrielle data collection notebook (`data_collection.ipynb`): Sentinel-1 export from Google Earth Engine | Switched to ascending orbit 81 for full AOI coverage |
+| 2026-10-08 | Sebastian | U-Net training notebook and setup docs (`unet_training.ipynb`, `docs/How the U-Net Training Setup Works.md`); data notebooks save to Google Drive | — |
+| 2026-10-14 | Sebastian | Training runs locally; added one-cycle schedule, val-tuned threshold and rule baseline | Test IoU 0.947 (ResNet-34) against pseudo-labels |
+| 2026-10-15 | Sebastian | Encoder comparison: ResNet-18 / ResNet-34 / EfficientNet-B2 × 3 seeds, with rule and Otsu baselines (`encoder_comparison.ipynb`) | No clear winner on Gabrielle; Idai patches needed |
+| 2026-10-17 | Sebastian | NZDF product notebook (full-scene inference, flood polygons, road overlay, external validation) and data visualisation notebook for the presentation | Waiting on HBRC flood extent and LINZ roads |
