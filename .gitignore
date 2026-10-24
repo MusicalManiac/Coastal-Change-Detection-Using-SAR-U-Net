@@ -10,3 +10,6 @@ data/reference/Hawke_s_Bay_Flood_Observation_Extents
 # Model outputs
 models/outputs
 models/__pycache__/encoder_comparison.cpython-311.pyc
+
+# Figures
+figures
