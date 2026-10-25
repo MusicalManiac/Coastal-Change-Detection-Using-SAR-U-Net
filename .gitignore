@@ -1,9 +1,18 @@
-# Generated training data and downloaded archives
+# Local data and generated artifacts
+data/raw/*.tif
+!data/raw/CycloneGabrielle_HawkesBay_S1_Stack_v2.tif
+!data/raw/Hale_S1_PrePost_202301_overlap-0000000000-0000000000.tif
+!data/raw/Idai_S1_PrePost_20190218_20190320_overlap.tif
+!data/raw/Idai_S1_PrePost_20190307_20190319.tif
 data/processed/
 data/archives/
-
-# Generated evaluation outputs
+models/checkpoints/
+!models/checkpoints/
+!models/checkpoints/unet_best.pt
 outputs/
+!outputs/evaluation/
+!outputs/evaluation/idai_20190218_20190320/
+!outputs/evaluation/idai_20190218_20190320/Idai_S1_PrePost_20190218_20190320_overlap_prediction.tif
 
 # Miscellaneous
 .DS_Store
