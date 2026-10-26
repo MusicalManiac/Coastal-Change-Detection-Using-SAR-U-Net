@@ -55,7 +55,8 @@ Superseded files, kept for the record and not used for the evaluation:
   experiment).
 
 An earlier reference, Copernicus EMS EMSR348 (AOI03 Beira), was processed in
-`notebooks/idai_reference.ipynb`; the evaluation uses the WFP/HDX product above.
+`notebooks/idai_reference.ipynb`; the evaluation uses the WFP/HDX product above
+because the raster was easier to reproduce and align with the Sentinel-1 stack.
 
 The reference dataset metadata describes the 12 March product as compiled from
 Copernicus and Sentinel-1, and the maximum product as using data from 12–21

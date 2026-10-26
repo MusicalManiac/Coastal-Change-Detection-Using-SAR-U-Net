@@ -26,7 +26,7 @@
 
 **Author:** Rata | **Date:** 5 October 2026 | **Notebook:** `notebooks/idai_reference.ipynb`
 
-> **Update (final evaluation):** the Idai evaluation used the WFP/HDX satellite-detected waters product (`data/idai/reference/`, see `data/idai/README.md`) with the Sentinel-1 pair 18 February → 20 March 2019, instead of EMSR348. The EMSR348 work below is kept as a record of the reference data sourced and considered.
+> **Update (final evaluation):** the Idai evaluation used the WFP/HDX satellite-detected waters product (`data/idai/reference/`, see `data/idai/README.md`) with the Sentinel-1 pair 18 February → 20 March 2019, instead of EMSR348. EMSR348 is supplied as vector layers that needed more complex processing, area-of-interest selection and alignment, and one of the two planned areas (AOI16 Beira North) had no flood-delineation product. The WFP/HDX detected-water raster was easier to reproduce and align directly with the Sentinel-1 GeoTIFF. This was a practical data-processing decision, not a judgement that WFP/HDX is more accurate. The EMSR348 work below is kept as a record of the reference data sourced and considered.
 
 ### What it is
 To evaluate our U-Net flood predictions, we need an independent map of where flooding actually occurred. We use the flood delineation produced by the Copernicus Emergency Management Service (EMS) for Tropical Cyclone Idai (activation **EMSR348**). EMS analysts produced these maps from satellite imagery during the emergency response to support humanitarian operations. The data is supplied as GIS vector layers (shapefiles), including the observed flood extent, permanent water bodies (hydrography) and the mapped area boundary.
