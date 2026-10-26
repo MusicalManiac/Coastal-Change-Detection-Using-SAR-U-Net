@@ -26,7 +26,7 @@ Notes to accompany `pipeline_flowchart.drawio.png` (a PNG that also contains the
 | Gabrielle radar | Sentinel-1 GRD, IW mode, VV + VH, relative orbit 81 (ascending). Before 21 Jan 2023, after 14 Feb 2023 07:07 UTC (about 8 pm NZDT). Area 176.60–177.10°E, 39.00–39.60°S (Napier / Esk Valley). Exported at 10 m, EPSG:32760. Orbit 81 was chosen because orbit 73 covered only about 10% of the area. (`notebooks/data_collection.ipynb`) |
 | JRC water | JRC Global Surface Water v1.4, occurrence band. Pixels water more than 80% of the time = permanent water. |
 | Idai radar | Sentinel-1, before 18 Feb 2019, after 20 Mar 2019, Beira, Mozambique; clipped to where both scenes overlap; EPSG:3857, 10 m. (`docs/idai_gee_export.js`) An earlier 7 → 19 Mar stack and a 14 → 19 Mar pair were side experiments, not used for the reported results. |
-| NZ radar | Dovi (Wairarapa, 1 → 13 Feb 2022), Ruby (East Cape, 3 → 15 Dec 2021), Gretel (Northland, 7 → 19 Mar 2020) (`notebooks/nz_external_testing.ipynb`, `testing-data` branch). Cyclone Hale (Hawke's Bay, 8 → 20 Jan 2023) was also exported but is not reported: its after image is about 9 days after the storm (group decision, 26 Oct). |
+| NZ radar | Dovi (Wairarapa, 1 → 13 Feb 2022), Ruby (East Cape, 3 → 15 Dec 2021), Gretel (Northland, 7 → 19 Mar 2020) (`notebooks/nz_external_testing.ipynb`; results in `docs/nz-external-test-results.md`). Cyclone Hale (Hawke's Bay, 8 → 20 Jan 2023) was also exported but is not reported: its after image is about 9 days after the storm (group decision, 26 Oct). |
 
 Full data references (APA 7): `docs/data-sources.md`.
 

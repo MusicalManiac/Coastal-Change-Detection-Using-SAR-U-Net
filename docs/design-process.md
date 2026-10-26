@@ -212,7 +212,7 @@ A summary of each member's contributions is in the main `README.md`.
 | 2026-10-08 | Sebastian | U-Net training notebook and setup docs (`unet_training.ipynb`, `docs/How the U-Net Training Setup Works.md`); data notebooks save to Google Drive | — |
 | 2026-10-14 | Sebastian | Training runs locally; added one-cycle schedule, val-tuned threshold and rule baseline | Test IoU 0.947 (ResNet-34) against pseudo-labels |
 | 2026-10-15 | Sebastian | Encoder comparison: ResNet-18 / ResNet-34 / EfficientNet-B2 × 3 seeds, with rule and Otsu baselines (`encoder_comparison.ipynb`) | No clear winner on Gabrielle; Idai patches needed |
-| 2026-10-12 | Rhett | NZ external testing notebook and results write-up for Dovi, Ruby and Gretel (`testing-data` branch) | No reference maps, so predicted extent only |
+| 2026-10-12 | Rhett | NZ external testing notebook and results write-up for Dovi, Ruby and Gretel (`testing-data` branch, merged into `main` on 26 Oct) | No reference maps, so predicted extent only |
 | 2026-10-14 | Nisheeth | Streamlit app, evaluation and alignment scripts, Idai and Hale exports, Idai reference data and Run A checkpoint (`project-demo-ready` branch) | — |
 | 2026-10-17 | Sebastian | NZDF product notebook (full-scene inference, flood polygons, road overlay, external validation) and data visualisation notebook for the presentation | Waiting on HBRC flood extent and LINZ roads |
 | 2026-10-19 | All | Final presentation | — |

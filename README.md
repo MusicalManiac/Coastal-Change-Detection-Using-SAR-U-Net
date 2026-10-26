@@ -73,8 +73,9 @@ Three evaluation workflows are included:
 
 3. **Other New Zealand cyclones (Dovi, Ruby, Gretel)**  
    Prediction-only tests with no independent reference maps, so only the
-   predicted flooded area is reported. Notebook and results are on the
-   `testing-data` branch until it is merged.
+   predicted flooded area is reported. Notebook:
+   `notebooks/nz_external_testing.ipynb`; results write-up:
+   `docs/nz-external-test-results.md`.
 
 Cyclone Hale was also exported and run but is not reported; see
 [Cyclone Hale](#cyclone-hale-prediction-only-testing-not-reported).
@@ -102,7 +103,8 @@ Coastal-Change-Detection-Using-SAR-U-Net/
 │   ├── nzdf_flood_product.ipynb      # Full-scene map, roads, HBRC validation
 │   ├── gabrielle_map.ipynb           # HBRC comparison map
 │   ├── study_area_map.ipynb          # Study-area map
-│   └── idai_reference.ipynb          # EMSR348 reference data (Idai)
+│   ├── idai_reference.ipynb          # EMSR348 reference data (Idai)
+│   └── nz_external_testing.ipynb     # Dovi, Ruby, Gretel tests (Colab)
 ├── data/
 │   ├── raw/                          # Sentinel-1 input stacks (Git LFS)
 │   └── idai/                         # Idai reference products and aligned masks
@@ -115,6 +117,7 @@ Coastal-Change-Detection-Using-SAR-U-Net/
 │   ├── Data Collection & Preprocessing Summary.md
 │   ├── How the U-Net Training Setup Works.md
 │   ├── Results & Findings Summary.md
+│   ├── nz-external-test-results.md   # NZ cyclone test results
 │   ├── hale_testing.md
 │   ├── idai_gee_export.js            # Earth Engine export, Idai
 │   ├── hale_gee_export.js            # Earth Engine export, Hale
@@ -380,6 +383,7 @@ without a reference, but accuracy metrics cannot be calculated responsibly.
 - [Data collection and preprocessing summary](docs/Data%20Collection%20%26%20Preprocessing%20Summary.md)
 - [How the U-Net training setup works](docs/How%20the%20U-Net%20Training%20Setup%20Works.md)
 - [Results and findings summary](docs/Results%20%26%20Findings%20Summary.md)
+- [NZ cyclone test results](docs/nz-external-test-results.md)
 - [Models and checkpoints](models/README.md)
 - [Idai data notes](data/idai/README.md)
 - [Hale testing notes](docs/hale_testing.md)
