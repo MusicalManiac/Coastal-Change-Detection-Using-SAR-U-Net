@@ -58,7 +58,7 @@ Three encoders, three seeds each, otherwise identical setup. Gabrielle test set,
 | Rule (VV change < −3.5 dB) | 0.570 | 0.570 | 1.000 |
 | Otsu threshold on `post_vv` (−16.33 dB) | 0.050 | 0.051 | 0.840 |
 
-**Finding:** the spread between encoders (0.004 IoU) is about the size of the seed noise. Against threshold labels, the encoder makes no meaningful difference, so the smallest one (resnet18) is the practical choice. The Idai / Beira transfer test hasn't been run yet (no Idai patches).
+**Finding:** the spread between encoders (0.004 IoU) is about the size of the seed noise. Against threshold labels, the encoder makes no meaningful difference, so the smallest one (resnet18) is the practical choice. The encoder-comparison models were not scored on Idai; the Idai evaluation of the two main runs is produced by `src/evaluate_model.py`.
 
 **Finding:** a single threshold on post-event backscatter alone (Otsu) is useless here (IoU 0.05), because hill shadow and smooth surfaces are as dark as water. The pre-event image is what makes change detection work.
 
@@ -165,7 +165,7 @@ Reference polygons in the scored area (155), by the share the map detected:
 - The labels are circular: the model is trained on a rule it can rebuild from its own inputs.
 - A single post-event image means the map is a snapshot, not a maximum extent.
 - The pre-event image is 24 days earlier, so some change may come from land or soil moisture rather than flooding.
-- One event and one place. The Idai transfer test hasn't been run yet.
+- One training event and one place. The Idai transfer test is produced by `src/evaluate_model.py`.
 - The HBRC reference is itself compiled from mixed sources and is a maximum, not a snapshot. Its recall penalty is partly a timing mismatch, not model error.
 
 **Future work the results point to:**
@@ -173,17 +173,16 @@ Reference polygons in the scored area (155), by the share the map detected:
 - Train or fine-tune on labels independent of the rule (part of the HBRC extent, or Copernicus EMS maps) and hold the rest out for testing.
 - Use brightening as flood evidence for vegetated and urban areas, or add coherence or optical data.
 - Use a post-event image closer to the peak (orbits 175 or 8), or several post-event dates, to estimate maximum extent.
-- Run the Idai / Beira test to check transfer to a new place.
 
 ## Where the numbers come from
 
 | Result | Source |
 | --- | --- |
-| Training, threshold tuning, test set, rule baseline | `models/unet_training.ipynb`, cells 6–9 |
-| Encoder comparison | `models/encoder_comparison.ipynb`, cell 7; `models/outputs/comparison/results.json` |
-| Full-scene inference, pseudo-label check, roads | `models/nzdf_flood_product.ipynb`, cells 6–13 |
-| External validation | `models/nzdf_flood_product.ipynb`, cell 15; `models/outputs/nzdf/external_validation.csv` |
-| Miss analysis | `models/nzdf_flood_product.ipynb`, cell 17; `reference_missed` layer; `reference_misses.png` |
+| Training, threshold tuning, test set, rule baseline | `notebooks/unet_training.ipynb`, cells 6–9 |
+| Encoder comparison | `notebooks/encoder_comparison.ipynb`, cell 7; `models/outputs/comparison/results.json` |
+| Full-scene inference, pseudo-label check, roads | `notebooks/nzdf_flood_product.ipynb`, cells 6–13 |
+| External validation | `notebooks/nzdf_flood_product.ipynb`, cell 15; `models/outputs/nzdf/external_validation.csv` |
+| Miss analysis | `notebooks/nzdf_flood_product.ipynb`, cell 17; `reference_missed` layer; `reference_misses.png` |
 | Maps for figures | `models/outputs/nzdf/full_scene_prediction.png`, `road_impact_map.png`, `reference_misses.png` |
 
 The product notebook needs the full 60-epoch checkpoint (`outputs/unet_best.pt`, epoch 51, threshold 0.30). A leftover 1-epoch checkpoint gave meaningless results (659 km² "flooded", IoU 0.03), and cell 3's warning catches this.

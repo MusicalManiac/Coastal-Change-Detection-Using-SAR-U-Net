@@ -49,9 +49,15 @@ It uses a U-Net with a ResNet-34 encoder and four input channels:
 pre_vv, pre_vh, post_vv, post_vh
 ```
 
+The committed checkpoint is **Run A**: a 40-epoch training run, best validation
+checkpoint at epoch 38, flood threshold 0.5. A second training run, **Run B**
+(60 epochs with a one-cycle learning-rate schedule, best epoch 51, threshold
+0.30 tuned on validation), is documented in `notebooks/unet_training.ipynb`;
+its checkpoint is not stored in the repo. See [models/README.md](models/README.md).
+
 ### Evaluation data
 
-Two unseen-event workflows are included:
+Three evaluation workflows are included:
 
 1. **Cyclone Idai, Beira, Mozambique**  
    Sentinel-1 data from 18 February 2019 (pre-event) and 20 March 2019
@@ -59,45 +65,80 @@ Two unseen-event workflows are included:
    product. The reference is aligned to the Sentinel-1 grid before metrics
    are calculated. This is the main quantitative external evaluation.
 
-2. **Ex-Tropical Cyclone Hale, Hawke's Bay, New Zealand**  
-   A Sentinel-1 pre/post test stack is available through the Earth Engine
-   export workflow. No independent Hale flood mask is currently available,
-   so Hale is a prediction-only demonstration. Do not report IoU, Dice/F1,
-   precision, or recall for Hale without an independent reference mask.
+2. **Cyclone Gabrielle against the Hawke's Bay Regional Council flood extent**  
+   The full Gabrielle scene is compared with HBRC's mapped maximum flood
+   extent (13–15 February 2023) in `notebooks/nzdf_flood_product.ipynb`,
+   which also produces the road-impact analysis. The HBRC layer itself is not
+   stored in the repo.
 
-Cyclone Gabrielle is both the training source and the bundled demo example; it
-must not be presented as an independent unseen-event test.
+3. **Other New Zealand cyclones (Dovi, Ruby, Gretel)**  
+   Prediction-only tests with no independent reference maps, so only the
+   predicted flooded area is reported. Notebook and results are on the
+   `testing-data` branch until it is merged.
+
+Cyclone Hale was also exported and run but is not reported; see
+[Cyclone Hale](#cyclone-hale-prediction-only-testing-not-reported).
+
+Cyclone Gabrielle is both the training source and the bundled demo example; the
+HBRC comparison uses an independent reference map, but not an unseen event.
 
 ## Project structure
 
 ```text
 Coastal-Change-Detection-Using-SAR-U-Net/
 ├── src/
-│   ├── app.py                 # Streamlit application
-│   ├── model.py               # Checkpoint/model loading
-│   ├── evaluate_model.py      # Full-scene and tiled evaluation
-│   └── align_reference.py     # Aligns a reference mask to a stack grid
-├── data/
-│   ├── raw/                   # Input Sentinel-1 GeoTIFFs
-│   ├── processed/             # Training patches and derived data
-│   ├── archives/              # Downloaded archives
-│   └── idai/                  # Idai reference products and aligned masks
-├── models/
-│   ├── checkpoints/           # Trained model checkpoint
-│   └── unet_training.ipynb    # Training notebook
+│   ├── app.py                        # Streamlit flood-mapping app
+│   ├── model.py                      # Checkpoint/model loading
+│   ├── evaluate_model.py             # Full-scene and tiled evaluation
+│   ├── align_reference.py            # Aligns a reference mask to a stack grid
+│   └── make_idai_error_map.py        # Hit / false-alarm / miss map for Idai
 ├── notebooks/
-│   ├── data_collection.ipynb  # Gabrielle Earth Engine collection
-│   ├── data_preprocessing.ipynb
-│   └── idai_reference.ipynb
+│   ├── data_collection.ipynb         # Gabrielle Sentinel-1 export (Earth Engine)
+│   ├── data_preprocessing.ipynb      # Rule labels, patches, spatial split
+│   ├── data_visualisation.ipynb      # Radar imagery figures
+│   ├── unet_training_40epoch.ipynb   # Run A (committed checkpoint)
+│   ├── unet_training.ipynb           # Run B (60 epochs)
+│   ├── encoder_comparison.ipynb      # ResNet-18 / ResNet-34 / EfficientNet-B2
+│   ├── nzdf_flood_product.ipynb      # Full-scene map, roads, HBRC validation
+│   ├── gabrielle_map.ipynb           # HBRC comparison map
+│   ├── study_area_map.ipynb          # Study-area map
+│   └── idai_reference.ipynb          # EMSR348 reference data (Idai)
+├── data/
+│   ├── raw/                          # Sentinel-1 input stacks (Git LFS)
+│   └── idai/                         # Idai reference products and aligned masks
+├── models/
+│   └── checkpoints/unet_best.pt      # Run A checkpoint (Git LFS)
 ├── docs/
-├── outputs/                   # Predictions, metrics, and evaluation results
-├── requirements.txt
-├── .streamlit/config.toml     # 1 GB upload limit for large GeoTIFFs
+│   ├── design-process.md             # Design decisions and task log
+│   ├── literature-review.md          # Background literature (APA 7)
+│   ├── data-sources.md               # Data sources and references (APA 7)
+│   ├── Data Collection & Preprocessing Summary.md
+│   ├── How the U-Net Training Setup Works.md
+│   ├── Results & Findings Summary.md
+│   ├── hale_testing.md
+│   ├── idai_gee_export.js            # Earth Engine export, Idai
+│   ├── hale_gee_export.js            # Earth Engine export, Hale
+│   └── figures/                      # Shared figures, pipeline flowchart and notes
+├── requirements.txt                  # App and evaluation dependencies
+├── .streamlit/config.toml            # 1 GB upload limit for large GeoTIFFs
 └── README.md
 ```
 
-Large GeoTIFFs, generated patches, checkpoints, and evaluation outputs are
-normally kept locally and may be excluded from version control.
+Large files (Sentinel-1 stacks, reference rasters and the checkpoint) are stored
+with Git LFS. Generated outputs are kept locally and are not in version
+control: `data/processed/`, `data/archives/`, `outputs/` and `models/outputs/`.
+
+### Side experiments and superseded files
+
+These are kept for the record but are not used for the reported results:
+
+- `data/raw/Idai_S1_PrePost_20190307_20190319.tif` and
+  `data/idai/Idai_reference_mask.tif`: an earlier Idai stack (7 → 19 March 2019)
+  and its aligned mask, superseded by the 18 February → 20 March pair.
+- `docs/idai_gee_export_20190314_20190319.js`: a separate 14 → 19 March 2019
+  Idai pair.
+- `data/raw/Hale_S1_PrePost_202301_overlap-0000000000-0000000000.tif`,
+  `docs/hale_gee_export.js` and `docs/hale_testing.md`: Cyclone Hale (see below).
 
 ## Installation and first start
 
@@ -124,6 +165,14 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
+
+`requirements.txt` covers the Streamlit app and the evaluation scripts. The
+notebooks install their own extra packages in their first cells (for example
+`geopandas`, `earthengine-api`, `geemap` and `contextily`).
+
+On macOS or Linux, create the environment with `python3 -m venv venv`, activate
+it with `source venv/bin/activate`, and use `/` instead of `\` in the paths
+below.
 
 ### 3. Confirm the checkpoint exists
 
@@ -234,7 +283,11 @@ over multiple dates. It does not distinguish permanent open water from newly
 inundated land, and it is not perfect surveyed ground truth. Report those
 limitations with the metrics.
 
-## Cyclone Hale: prediction-only testing
+## Cyclone Hale: prediction-only testing (not reported)
+
+Hale was exported and run but is not reported: its post-event image
+(20 January 2023) was acquired about 9 days after the storm. The workflow is
+kept for reproducibility.
 
 Run [docs/hale_gee_export.js](docs/hale_gee_export.js) in the Google Earth
 Engine Code Editor. It searches for a pre/post Sentinel-1 VV+VH pair over
@@ -246,7 +299,7 @@ evaluation:
 
 ```powershell
 python src\evaluate_model.py `
-  --stack data\raw\Hale_S1_PrePost_202301_overlap.tif `
+  --stack data\raw\Hale_S1_PrePost_202301_overlap-0000000000-0000000000.tif `
   --checkpoint models\checkpoints\unet_best.pt `
   --output-dir outputs\evaluation\hale
 ```
@@ -310,18 +363,35 @@ without a reference, but accuracy metrics cannot be calculated responsibly.
 - The training labels are SAR-derived threshold proxies, not independent
   surveyed flood labels.
 - The model was trained on one Gabrielle scene pair, so results on Idai and
-  Hale are cross-event tests with possible geographic and acquisition
-  differences.
+  the other New Zealand cyclones are cross-event tests with possible
+  geographic and acquisition differences.
 - Idai metrics depend on a multi-date detected-water reference and the valid
   overlap of the selected Sentinel-1 scenes.
-- Hale currently has no independent reference mask.
+- Dovi, Ruby, Gretel and Hale have no independent reference masks.
 - Outputs are decision-support demonstrations and must not be used as a
   safety certification, evacuation map, or replacement for local validation.
 
 ## Further documentation
 
+- [Design process and task log](docs/design-process.md)
+- [Literature review](docs/literature-review.md)
+- [Data sources](docs/data-sources.md)
+- [Pipeline flowchart](docs/figures/pipeline_flowchart.drawio.png) and [flowchart notes](docs/figures/pipeline_flowchart_notes.md)
 - [Data collection and preprocessing summary](docs/Data%20Collection%20%26%20Preprocessing%20Summary.md)
 - [How the U-Net training setup works](docs/How%20the%20U-Net%20Training%20Setup%20Works.md)
+- [Results and findings summary](docs/Results%20%26%20Findings%20Summary.md)
+- [Models and checkpoints](models/README.md)
 - [Idai data notes](data/idai/README.md)
 - [Hale testing notes](docs/hale_testing.md)
-- [Risk analysis](docs/risk-analysis.md)
+- [Figures](docs/figures/)
+
+## Contributions
+
+| Member | Main contributions |
+| --- | --- |
+| Rata Lomax | Researched the problem and the Navy's needs, including an interview with a Navy contact; built the pitch slides and speech; sourced and documented the Copernicus EMS EMSR348 reference flood data for Cyclone Idai (`notebooks/idai_reference.ipynb`); project organisation and coordination throughout (meeting notes, to-do lists and task tracking, group check-ins, contributions record, project review); designed the final presentation and slides 1–4 and 12, and integrated everyone's slides; literature review and data-sources table with verified references; pipeline flowchart and notes; repository review and documentation clean-up. |
+| Sebastian Torres | Researched satellite and AI methods; searched NZ cyclone events in Earth Engine; set up the design-process document; collected and pre-processed the Gabrielle radar data and created the training labels; trained the U-Net (40- and 60-epoch runs); encoder comparison; full-scene flood product, road-impact analysis and HBRC validation; study-area and Gabrielle maps; slides 5–6. |
+| Nisheeth Bhooshan Gupta | Researched project risks and wrote the pitch overview; checked global flood events and datasets; set up and coordinated the GitHub repo, including merging branches; exported and aligned the Cyclone Idai data and ran the independent Idai evaluation for both runs, including the error map; built the Streamlit flood-mapping app and demo recording; slides 7 and 10. |
+| Rhett Murdoch | Researched the expected product and real NZDF operations; prepared pitch Q&A; tested the model on other NZ cyclones (Dovi, Ruby, Gretel) and wrote up the results; slides 8, 9 and 11. |
+
+All members: weekly meetings, ideation, planning and reviewing each other's work.

@@ -12,7 +12,11 @@
 | Event Name | Region | Event Date | Pre-Event S1 Scene | Post-Event S1 Scene | Local Timestamp (NZDT) | Orbit Pass | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Cyclone Gabrielle** | Hawke's Bay | Feb 14, 2023 | 2023-01-21 07:07 UTC | 2023-02-14 07:07 UTC | Feb 14, 08:07 PM NZDT | Ascending (relative orbit 81) | **PASS** (Same orbit, 100% AOI coverage, during peak flooding) |
-| **Cyclone Idai** | Beira, Mozambique | Mar 14, 2019 | TBC (Nisheeth) | TBC – closest to 2019-03-16 14:41 UTC | — | TBC | **Test event** (EMS reference: EMSR348 AOI03) |
+| **Cyclone Idai** | Beira, Mozambique | Mar 14, 2019 | 2019-02-18 16:06 UTC (S1B) | 2019-03-20 16:07 UTC (S1A) | — | Same track (~16:07 UTC passes) | **Test event** (reference: WFP/HDX detected waters, 12–21 Mar 2019) |
+| **Cyclone Dovi** | Wairarapa | Feb 2022 | 2022-02-01 | 2022-02-13 | Feb 14, about 06:22 AM NZDT | — | **Exploratory** (no reference map) |
+| **Cyclone Ruby** | East Cape | Dec 2021 | 2021-12-03 | 2021-12-15 | Dec 16, about 06:21 AM NZDT | — | **Exploratory** (no reference map) |
+| **Cyclone Gretel** | Northland | Mar 2020 | 2020-03-07 | 2020-03-19 | Mar 19, about 08:07 PM NZDT | — | **Exploratory** (no reference map) |
+| **Cyclone Hale** | Hawke's Bay | Jan 2023 | 2023-01-08 17:30 UTC | 2023-01-20 17:30 UTC | Jan 21, about 06:30 AM NZDT | Same track | Exported, not reported (after image about 9 days after the storm) |
 
 **Change from original plan (Gabrielle):** the descending pass (relative orbit 73, 1 and 13 Feb) covered only about 91% of the area of interest, so `data_collection.ipynb` uses the ascending pass on relative orbit 81 instead. Each pass is delivered as two GRD slices, which are mosaicked to cover the full area.
 
@@ -20,7 +24,9 @@
 
 ## 3. Reference (Ground-Truth) Data for Model Evaluation — Cyclone Idai, Beira
 
-**Author:** Rata | **Date:** 5 October 2026 | **Notebook:** `notebooks/01_reference_data.ipynb`
+**Author:** Rata | **Date:** 5 October 2026 | **Notebook:** `notebooks/idai_reference.ipynb`
+
+> **Update (final evaluation):** the Idai evaluation used the WFP/HDX satellite-detected waters product (`data/idai/reference/`, see `data/idai/README.md`) with the Sentinel-1 pair 18 February → 20 March 2019, instead of EMSR348. The EMSR348 work below is kept as a record of the reference data sourced and considered.
 
 ### What it is
 To evaluate our U-Net flood predictions, we need an independent map of where flooding actually occurred. We use the flood delineation produced by the Copernicus Emergency Management Service (EMS) for Tropical Cyclone Idai (activation **EMSR348**). EMS analysts produced these maps from satellite imagery during the emergency response to support humanitarian operations. The data is supplied as GIS vector layers (shapefiles), including the observed flood extent, permanent water bodies (hydrography) and the mapped area boundary.
@@ -54,7 +60,7 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 ### Processing
 1. Downloaded the vector packages and map PDFs directly from the EMS website in Google Colab (source URLs recorded in the notebook) and saved them to the shared Google Drive (`data/idai/reference/`).
 2. Unzipped the packages and loaded the layers with `geopandas`.
-3. Exported a single cleaned file, `data/idai/reference_clean/idai_beira_flood_reference.gpkg`, with three layers:
+3. Exported a single cleaned file, `data/idai/reference_clean/idai_beira_flood_reference.gpkg` (saved to the shared Google Drive, not in the repo), with three layers:
    - `flood` – observed flood extent (1 multi-part feature)
    - `permanent_water` – rivers, lakes and sea (14 features)
    - `aoi` – mapped area boundary (1 feature)
@@ -73,8 +79,8 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 - **Rasterisation:** the vector polygons must be converted to a pixel grid matching the model output, which may introduce small errors along flood edges.
 
 ### Open questions
-- [ ] Which Sentinel-1 acquisition over Beira is closest to 16 March 2019? (Nisheeth)
-- [ ] Is Cyclone Idai one of the 43 Kuro Siwo training events? If so, it cannot be used as a fair test event. (Sebastian / Nisheeth)
+- [x] Which Sentinel-1 acquisition over Beira is closest to 16 March 2019? → The evaluation used the 18 February → 20 March 2019 pair, the closest same-track pair whose footprints overlap over Beira.
+- [x] Is Cyclone Idai one of the 43 Kuro Siwo training events? → No longer relevant: Kuro Siwo was not used (about 700 GB, too large to download and train on); the model was trained on Cyclone Gabrielle only.
 
 ---
 
@@ -88,7 +94,7 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
         |
         v
 [ U-Net training & test scoring ] --> [ Full-scene inference ] --> [ Flood polygons + flooded road segments ]
-  models/unet_training.ipynb            models/nzdf_flood_product.ipynb (GeoTIFF, GeoPackage, GeoJSON)
+  notebooks/unet_training.ipynb            notebooks/nzdf_flood_product.ipynb (GeoTIFF, GeoPackage, GeoJSON)
 ```
 
 | Stage | Notebook | Runs on | Output |
@@ -96,9 +102,13 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 | Data collection | `notebooks/data_collection.ipynb` | Colab | `CycloneGabrielle_HawkesBay_S1_Stack_v2.tif` on Google Drive |
 | Preprocessing | `notebooks/data_preprocessing.ipynb` | Colab | `dataset_patches/` on Google Drive (copied to `data/` for training) |
 | Data visualisation | `notebooks/data_visualisation.ipynb` | Local | Presentation figures in `notebooks/figures/` |
-| Training | `models/unet_training.ipynb` | Local GPU | `models/outputs/unet_best.pt` |
-| Encoder comparison | `models/encoder_comparison.ipynb` | Local GPU | `models/outputs/comparison/` |
-| NZDF product | `models/nzdf_flood_product.ipynb` | Local | `models/outputs/nzdf/` |
+| Training, Run A (40 epochs) | `notebooks/unet_training_40epoch.ipynb` | Colab GPU | `models/checkpoints/unet_best.pt` (in the repo) |
+| Training, Run B (60 epochs) | `notebooks/unet_training.ipynb` | Local GPU | `models/outputs/unet_best.pt` (not in the repo) |
+| Encoder comparison | `notebooks/encoder_comparison.ipynb` | Local GPU | `models/outputs/comparison/` |
+| NZDF product and HBRC validation | `notebooks/nzdf_flood_product.ipynb` | Local | `models/outputs/nzdf/` |
+| Idai evaluation | `src/align_reference.py`, `src/evaluate_model.py`, `src/make_idai_error_map.py` | Local | `outputs/evaluation/` |
+| NZ cyclone tests | `notebooks/nz_external_testing.ipynb` | Colab | Prediction previews and run summaries |
+| Flood-mapping app | `src/app.py` (Streamlit) | Local | Interactive flood map |
 
 ---
 
@@ -126,7 +136,9 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 ### Training Configuration
 - **Architecture:** U-Net (`segmentation-models-pytorch`) with an ImageNet-pretrained encoder, 4 input channels, 1 output.
 - **Loss:** binary cross-entropy + Dice, to cope with only ~1.4% of pixels being flooded.
-- **Optimiser:** AdamW with a one-cycle learning-rate schedule (peak 1e-3), 60 epochs, batch size 16, flip and 90° rotation augmentation.
+- **Optimiser:** AdamW, batch size 16, flip and 90° rotation augmentation. Two runs:
+  - **Run A:** 40 epochs, fixed threshold 0.5 (best validation checkpoint at epoch 38).
+  - **Run B:** 60 epochs with a one-cycle learning-rate schedule (peak 1e-3), threshold tuned on validation (best validation checkpoint at epoch 51, threshold 0.30).
 - **Model selection:** checkpoint with the best validation IoU; the probability threshold is then tuned on validation (not test) and stored in the checkpoint.
 
 ---
@@ -135,7 +147,9 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 
 All scores are flood-class metrics on the held-out **test blocks**, measured against the threshold labels. They show how closely each method reproduces the labelling rule.
 
-**Main model** (`unet_training.ipynb`, ResNet-34, best epoch 51, threshold 0.30): test IoU **0.947**, precision 0.971, recall 0.974, F1 0.973.
+**Run A** (`unet_training_40epoch.ipynb`, ResNet-34, best epoch 38, threshold 0.5): test IoU **0.927**, precision 0.955, recall 0.969, F1 0.962.
+
+**Run B** (`unet_training.ipynb`, ResNet-34, best epoch 51, threshold 0.30): test IoU **0.947**, precision 0.971, recall 0.974, F1 0.973.
 
 **Encoder comparison** (`encoder_comparison.ipynb`, same setup, 3 seeds each, mean ± std):
 
@@ -151,13 +165,13 @@ All scores are flood-class metrics on the held-out **test blocks**, measured aga
 - The three encoders are within about two standard deviations of each other, so none is clearly better on these labels.
 - The U-Nets beat the plain rule mainly by also learning to leave out permanent water, which the labels exclude but the inputs do not mark.
 - Otsu scores low because it also marks the sea and rivers.
-- The comparison that matters is on independent labels (Idai EMS, Section 3, and the Gabrielle reference below). That test has not been run yet.
+- Independent evaluations: Gabrielle against the HBRC flood extent (`notebooks/nzdf_flood_product.ipynb`, Section 7) and Idai against the WFP/HDX map (`src/evaluate_model.py`, Section 3). Shared numbers: `docs/figures/pipeline_flowchart_notes.md`.
 
 ---
 
 ## 7. NZDF Decision Product & External Validation
 
-**Notebook:** `models/nzdf_flood_product.ipynb`
+**Notebook:** `notebooks/nzdf_flood_product.ipynb`
 
 1. **Full-scene inference:** predicts the whole 6667 × 4330 pixel Hawke's Bay scene with overlapping, blended 256-pixel windows. Outputs a flood probability GeoTIFF and a binary flood GeoTIFF (1 = flooded, 0 = dry, 255 = nodata).
 2. **Vectorisation & road overlay:** converts the flood map to polygons (dropping those under 1,000 m²) and intersects them with LINZ *NZ Road Centrelines (Topo, 1:50k)*. The result is the length and share of each road under water. Outputs are a GeoPackage in NZTM2000 (EPSG:2193) for QGIS, plus GeoJSON copies.
@@ -174,25 +188,34 @@ All scores are flood-class metrics on the held-out **test blocks**, measured aga
 
 ## 8. Open Questions & Next Steps
 
-- [ ] Request the Cyclone Gabrielle flood extent GIS layer from HBRC for external validation. (Sebastian)
-- [ ] Download LINZ road centrelines for Hawke's Bay and run the road overlay. (Sebastian)
-- [ ] Build `data/idai_patches/` (Sentinel-1 + EMS labels, normalised with the Gabrielle statistics) so `encoder_comparison.ipynb` can score every model on Idai. (Nisheeth / Rata)
-- [ ] Choose the final encoder once the Idai scores are in.
-- [ ] Decide whether to keep the pseudo-labels or retrain on independent labels, given the label leakage above.
+- [x] Request the Cyclone Gabrielle flood extent GIS layer from HBRC for external validation. → Obtained and used in `notebooks/nzdf_flood_product.ipynb` (the layer itself is not in the repo).
+- [x] Download LINZ road centrelines for Hawke's Bay and run the road overlay. → Done (LINZ layer 50329).
+- [x] Build `data/idai_patches/` so `encoder_comparison.ipynb` can score every model on Idai. → Replaced: Idai was evaluated full-scene with `src/evaluate_model.py` for Runs A and B; the encoder-comparison models were not scored on Idai.
+- [x] Choose the final encoder once the Idai scores are in. → ResNet-34 kept for both runs.
+- [x] Decide whether to keep the pseudo-labels or retrain on independent labels. → Pseudo-labels kept; retraining on independent labels was not done within the project.
 
 ---
 
-## 9. Team Task Log & Contributions
+## 9. Team Task Log
+
+A summary of each member's contributions is in the main `README.md`.
 
 | Date | Contributor | Task / Component Completed | Notes / Blockers |
 | :--- | :--- | :--- | :--- |
-| YYYY-MM-DD | [Name] | Created initial repository structure & GEE script | Completed Task 1 & 2 setup |
-| YYYY-MM-DD | [Name] | Preprocessed Sentinel-1 imagery for Cyclone Gabrielle | Calibrated to $\sigma^0$ dB |
-| YYYY-MM-DD | [Name] | Established Otsu change-detection baseline | IoU baseline = X.XX |
-| 2026-10-05 | Rata | Sourced and processed reference flood data for Cyclone Idai (Copernicus EMS EMSR348, AOI03 Beira); notebook `01_reference_data.ipynb`, cleaned output `idai_beira_flood_reference.gpkg` | AOI16 has no flood delineation. Need S1 scene closest to 16 Mar 2019 and confirmation Idai isn't in Kuro Siwo training set |
+| 2026-09-17 | Nisheeth | Created the GitHub repository | — |
+| 2026-10-01 | Nisheeth | Initial project structure and README | — |
+| 2026-10-01 | Sebastian | Design-process document | — |
+| 2026-10-01 | Rata | EMSR348 reference-data notebook (`notebooks/idai_reference.ipynb`) | — |
+| 2026-10-05 | Rata | Sourced and processed reference flood data for Cyclone Idai (Copernicus EMS EMSR348, AOI03 Beira) and documented it in Section 3; cleaned output `idai_beira_flood_reference.gpkg` on the shared Google Drive | AOI16 has no flood delineation. Need S1 scene closest to 16 Mar 2019 and confirmation Idai isn't in Kuro Siwo training set |
 | 2026-10-05 | Sebastian | Preprocessing notebook: 256-pixel patches, spatial block split, train-only normalisation (`data_preprocessing.ipynb`) | Labels are the −3.5 dB rule, so scores on them measure rule-copying |
 | 2026-10-08 | Nisheeth | Added Gabrielle data collection notebook (`data_collection.ipynb`): Sentinel-1 export from Google Earth Engine | Switched to ascending orbit 81 for full AOI coverage |
 | 2026-10-08 | Sebastian | U-Net training notebook and setup docs (`unet_training.ipynb`, `docs/How the U-Net Training Setup Works.md`); data notebooks save to Google Drive | — |
 | 2026-10-14 | Sebastian | Training runs locally; added one-cycle schedule, val-tuned threshold and rule baseline | Test IoU 0.947 (ResNet-34) against pseudo-labels |
 | 2026-10-15 | Sebastian | Encoder comparison: ResNet-18 / ResNet-34 / EfficientNet-B2 × 3 seeds, with rule and Otsu baselines (`encoder_comparison.ipynb`) | No clear winner on Gabrielle; Idai patches needed |
+| 2026-10-12 | Rhett | NZ external testing notebook and results write-up for Dovi, Ruby and Gretel (`testing-data` branch) | No reference maps, so predicted extent only |
+| 2026-10-14 | Nisheeth | Streamlit app, evaluation and alignment scripts, Idai and Hale exports, Idai reference data and Run A checkpoint (`project-demo-ready` branch) | — |
 | 2026-10-17 | Sebastian | NZDF product notebook (full-scene inference, flood polygons, road overlay, external validation) and data visualisation notebook for the presentation | Waiting on HBRC flood extent and LINZ roads |
+| 2026-10-19 | All | Final presentation | — |
+| 2026-10-24 | Sebastian | HBRC validation and road-impact analysis, study-area and Gabrielle maps, results summary; merged `seb/local-data` into `main` | — |
+| 2026-10-25 | Nisheeth | Idai error map, Idai evaluation with Run B, 14 → 19 March pair export (experiment); merged `project-demo-ready` into `main` | — |
+| 2026-10-26 | Rata | Literature review, data-sources table, pipeline flowchart and notes, restored the Run A training notebook, documentation clean-up and figures | — |

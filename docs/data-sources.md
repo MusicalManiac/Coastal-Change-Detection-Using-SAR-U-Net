@@ -1,6 +1,6 @@
 # Data Sources
 
-Data used in the GEOG 761 project *Coastal Change Detection Using Sentinel-1 SAR and U-Net*. Table A is for the report's Methods section; Table B is optional supporting detail. References follow APA 7th edition.
+Data used in the GEOG 761 project *Coastal Change Detection Using Sentinel-1 SAR and U-Net*. Table A lists the data sets; Table B lists the Sentinel-1 image pairs. References follow APA 7th edition.
 
 ## Table A. Data sources used in the flood-mapping pipeline
 
@@ -11,15 +11,15 @@ Data used in the GEOG 761 project *Coastal Change Detection Using Sentinel-1 SAR
 | Satellite detected waters, Cyclone Idai | World Food Programme, via Humanitarian Data Exchange | ~95 m | Maximum flood extent mapped from Sentinel-1, 12–21 March 2019 | Independent reference map for the Idai accuracy test | World Food Programme (2019) |
 | Cyclone Gabrielle flood extent | Hawke's Bay Regional Council | Vector polygons | Maximum flood extent, 13–15 February 2023, from photos, video, satellite imagery, building inspections and ground contours | Independent reference map for the Gabrielle accuracy test | Hawke's Bay Regional Council (n.d., 2025) |
 | NZ Road Centrelines (Topo, 1:50k) | Toitū Te Whenua Land Information New Zealand, via LINZ Data Service | 1:50,000 vector | National road network | Identifies roads crossed by predicted flooding | Toitū Te Whenua Land Information New Zealand (n.d.) |
-| Sentinel-2 optical imagery | ESA Copernicus, via Copernicus Browser | 10 m | Optical (visible light) passes over Napier, 8–22 February 2023, with cloud cover | Shows that cloud blocked the optical view near the Gabrielle flood peak (motivation) | Drusch et al. (2012); Copernicus Data Space Ecosystem (n.d.) |
+| Sentinel-2 optical imagery | ESA Copernicus, via Copernicus Browser | 10 m | Optical (visible light) passes over Napier, 8–22 February 2023, with cloud cover | Checking optical coverage and cloud near the Gabrielle flood peak | Drusch et al. (2012); Copernicus Data Space Ecosystem (n.d.) |
 
-*Optional row, only if the report explains the reference switch:*
+*Considered but not used in the final evaluation:*
 
 | Data | Provider | Resolution | Details | Use | Reference |
 |---|---|---|---|---|---|
 | EMSR348 flood delineation | Copernicus Emergency Management Service | Vector polygons | Flood extent mapped during the Idai emergency, Beira (AOI03) | First Idai reference considered; replaced by the WFP/HDX map | Copernicus Emergency Management Service (2019) |
 
-## Table B. Sentinel-1 image pairs (optional supporting detail)
+## Table B. Sentinel-1 image pairs
 
 | Event | Area | Before image | After image | Role |
 |---|---|---|---|---|
@@ -31,11 +31,9 @@ Data used in the GEOG 761 project *Coastal Change Detection Using Sentinel-1 SAR
 
 Gabrielle uses relative orbit 81 (ascending), which covers the whole area on both dates. Dates are satellite acquisition dates (UTC).
 
-## Notes for the report
+## Credit lines
 
 - **Credit lines for maps and figures.** Copernicus asks for *"Contains modified Copernicus Sentinel data (2019–2023)"* (images from 2019, 2020, 2021, 2022 and 2023 are used); Earth Engine asks for *"Source: EC JRC/Google"* on maps that use the JRC water layer.
-- **The Idai reference shares a sensor with the model.** The WFP/HDX map was made from Sentinel-1, which is worth a sentence in the Discussion.
-- **HBRC is a maximum extent over three days; the radar is one snapshot.** This explains much of the missed flooding (Discussion).
 
 ---
 

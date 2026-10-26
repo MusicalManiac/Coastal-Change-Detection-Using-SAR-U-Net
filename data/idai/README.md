@@ -41,10 +41,21 @@ intersection of the pre-event footprint, post-event footprint, and Beira AOI,
 rather than the former fixed rectangle. This avoids the earlier export in which
 only about 0.79% of pixels had valid SAR values.
 
-Date mismatch to report: the current Idai stack uses the 7 March 2019
-pre-event scene, while 18 February 2019 is the agreed pre-event baseline
-elsewhere in the project. The 7 March scene has been retained for reproducibility
-and must not be described as the 18 February baseline.
+## Scenes used
+
+The Idai test uses the Sentinel-1 pair **18 February 2019 (pre-event) →
+20 March 2019 (post-event)**, exported by `docs/idai_gee_export.js` to
+`data/raw/Idai_S1_PrePost_20190218_20190320_overlap.tif`.
+
+Superseded files, kept for the record and not used for the evaluation:
+
+- `data/raw/Idai_S1_PrePost_20190307_20190319.tif` (7 → 19 March stack) and its
+  aligned mask `data/idai/Idai_reference_mask.tif`;
+- `docs/idai_gee_export_20190314_20190319.js` (14 → 19 March pair, a separate
+  experiment).
+
+An earlier reference, Copernicus EMS EMSR348 (AOI03 Beira), was processed in
+`notebooks/idai_reference.ipynb`; the evaluation uses the WFP/HDX product above.
 
 The reference dataset metadata describes the 12 March product as compiled from
 Copernicus and Sentinel-1, and the maximum product as using data from 12–21
@@ -56,11 +67,10 @@ To align the maximum-extent reference to an exported Sentinel-1 stack, run:
 ```powershell
 python src\align_reference.py `
   --reference data\idai\reference\extracted\MOZ_TotalFloodExtent12to2.tif `
-  --stack data\raw\Idai_S1_PrePost_20190307_20190319.tif `
-  --output data\idai\Idai_reference_mask.tif
+  --stack data\raw\Idai_S1_PrePost_20190218_20190320_overlap.tif `
+  --output data\idai\Idai_reference_mask_20190218_20190320.tif
 ```
 
 The source uses value `1` for mapped flood and `255` as nodata. The alignment
 converts nodata to `0` because the reference raster covers the stack extent.
-This treats unmapped pixels within that extent as non-flooded; report this
-assumption when presenting the evaluation.
+This treats unmapped pixels within that extent as non-flooded.
