@@ -79,8 +79,8 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 - **Rasterisation:** the vector polygons must be converted to a pixel grid matching the model output, which may introduce small errors along flood edges.
 
 ### Open questions
-- [x] Which Sentinel-1 acquisition over Beira is closest to 16 March 2019? → The evaluation used the 18 February → 20 March 2019 pair, the closest same-track pair whose footprints overlap over Beira.
-- [x] Is Cyclone Idai one of the 43 Kuro Siwo training events? → No longer relevant: Kuro Siwo was not used (about 700 GB, too large to download and train on); the model was trained on Cyclone Gabrielle only.
+- [x] Which Sentinel-1 acquisition over Beira is closest to 16 March 2019? Answer: The evaluation used the 18 February → 20 March 2019 pair, the closest same-track pair whose footprints overlap over Beira.
+- [x] Is Cyclone Idai one of the 43 Kuro Siwo training events? Answer: Not relevant in the end. Kuro Siwo was not used (about 700 GB, too large to download and train on); the model was trained on Cyclone Gabrielle only.
 
 ---
 
@@ -105,7 +105,8 @@ The original plan included flood delineation for AOI16 Beira North. On inspectio
 | Training, Run A (40 epochs) | `notebooks/unet_training_40epoch.ipynb` | Colab GPU | `models/checkpoints/unet_best.pt` (in the repo) |
 | Training, Run B (60 epochs) | `notebooks/unet_training.ipynb` | Local GPU | `models/outputs/unet_best.pt` (not in the repo) |
 | Encoder comparison | `notebooks/encoder_comparison.ipynb` | Local GPU | `models/outputs/comparison/` |
-| NZDF product and HBRC validation | `notebooks/nzdf_flood_product.ipynb` | Local | `models/outputs/nzdf/` |
+| NZDF product and HBRC validation, Run B | `notebooks/nzdf_flood_product.ipynb` | Local | `models/outputs/nzdf/` |
+| HBRC validation, Run A | `notebooks/nzdf_flood_product_runA.ipynb` | Colab GPU | Scores in the notebook; figures in `docs/figures/` |
 | Idai evaluation | `src/align_reference.py`, `src/evaluate_model.py`, `src/make_idai_error_map.py` | Local | `outputs/evaluation/` |
 | NZ cyclone tests | `notebooks/nz_external_testing.ipynb` | Colab | Prediction previews and run summaries |
 | Flood-mapping app | `src/app.py` (Streamlit) | Local | Interactive flood map |
@@ -171,7 +172,7 @@ All scores are flood-class metrics on the held-out **test blocks**, measured aga
 
 ## 7. NZDF Decision Product & External Validation
 
-**Notebook:** `notebooks/nzdf_flood_product.ipynb`
+**Notebook:** `notebooks/nzdf_flood_product.ipynb` (Run B outputs). `notebooks/nzdf_flood_product_runA.ipynb` records the same notebook run with Run A in Google Colab, without the road layer or the test-block split.
 
 1. **Full-scene inference:** predicts the whole 6667 × 4330 pixel Hawke's Bay scene with overlapping, blended 256-pixel windows. Outputs a flood probability GeoTIFF and a binary flood GeoTIFF (1 = flooded, 0 = dry, 255 = nodata).
 2. **Vectorisation & road overlay:** converts the flood map to polygons (dropping those under 1,000 m²) and intersects them with LINZ *NZ Road Centrelines (Topo, 1:50k)*. The result is the length and share of each road under water. Outputs are a GeoPackage in NZTM2000 (EPSG:2193) for QGIS, plus GeoJSON copies.
@@ -188,11 +189,11 @@ All scores are flood-class metrics on the held-out **test blocks**, measured aga
 
 ## 8. Open Questions & Next Steps
 
-- [x] Request the Cyclone Gabrielle flood extent GIS layer from HBRC for external validation. → Obtained and used in `notebooks/nzdf_flood_product.ipynb` (the layer itself is not in the repo).
-- [x] Download LINZ road centrelines for Hawke's Bay and run the road overlay. → Done (LINZ layer 50329).
-- [x] Build `data/idai_patches/` so `encoder_comparison.ipynb` can score every model on Idai. → Replaced: Idai was evaluated full-scene with `src/evaluate_model.py` for Runs A and B; the encoder-comparison models were not scored on Idai.
-- [x] Choose the final encoder once the Idai scores are in. → ResNet-34 kept for both runs.
-- [x] Decide whether to keep the pseudo-labels or retrain on independent labels. → Pseudo-labels kept; retraining on independent labels was not done within the project.
+- [x] Request the Cyclone Gabrielle flood extent GIS layer from HBRC for external validation. Outcome: Obtained and used in `notebooks/nzdf_flood_product.ipynb` (the layer itself is not in the repo).
+- [x] Download LINZ road centrelines for Hawke's Bay and run the road overlay. Outcome: Done (LINZ layer 50329).
+- [x] Build `data/idai_patches/` so `encoder_comparison.ipynb` can score every model on Idai. Outcome: Replaced. Idai was evaluated full-scene with `src/evaluate_model.py` for Runs A and B; the encoder-comparison models were not scored on Idai.
+- [x] Choose the final encoder once the Idai scores are in. Outcome: ResNet-34 kept for both runs.
+- [x] Decide whether to keep the pseudo-labels or retrain on independent labels. Outcome: Pseudo-labels kept; retraining on independent labels was not done within the project.
 
 ---
 
@@ -218,4 +219,4 @@ A summary of each member's contributions is in the main `README.md`.
 | 2026-10-19 | All | Final presentation | — |
 | 2026-10-24 | Sebastian | HBRC validation and road-impact analysis, study-area and Gabrielle maps, results summary; merged `seb/local-data` into `main` | — |
 | 2026-10-25 | Nisheeth | Idai error map, Idai evaluation with Run B, 14 → 19 March pair export (experiment); merged `project-demo-ready` into `main` | — |
-| 2026-10-26 | Rata | Literature review, data-sources table, pipeline flowchart and notes, restored the Run A training notebook, documentation clean-up and figures | — |
+| 2026-10-26 | Rata | Literature review, data-sources table, pipeline flowchart and notes, restored the Run A training notebook, documentation clean-up and figures; HBRC validation with Run A and the HBRC comparison map | — |

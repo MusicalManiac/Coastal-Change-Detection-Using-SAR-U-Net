@@ -4,7 +4,7 @@ Oct 8, 2026 · @Sebastian
 
 ## Overview
 
-`models/unet_training.ipynb` trains a U-Net to mark flooded pixels in Sentinel-1 radar patches, then scores it on a held-out test set. It is Phase 4 of the project and runs after `data/data_preprocessing.ipynb`, which produces the patches it reads.
+`notebooks/unet_training.ipynb` trains a U-Net to mark flooded pixels in Sentinel-1 radar patches, then scores it on a held-out test set. It is Phase 4 of the project and runs after `notebooks/data_preprocessing.ipynb`, which produces the patches it reads.
 
 The notebook does five things in order:
 
@@ -155,7 +155,7 @@ The checkpoint carries the normalisation values on purpose. Anyone running the m
 
 The notebook is written for Google Colab and runs top to bottom with no manual steps between cells.
 
-1. Open `models/unet_training.ipynb` in Colab and switch to a GPU runtime (Runtime > Change runtime type > GPU).
+1. Open `notebooks/unet_training.ipynb` in Colab and switch to a GPU runtime (Runtime > Change runtime type > GPU).
 2. Get `dataset_patches/` onto the runtime. Either run `notebooks/data_preprocessing.ipynb` in the same session or upload the folder. It must contain `train/`, `val/`, `test/` and `dataset_info.json`.
 3. Run all cells. The first one installs `segmentation-models-pytorch`.
 4. Download `unet_best.pt` and the two PNGs when it finishes. Locally, keep them in `models/checkpoints/` and `outputs/`.

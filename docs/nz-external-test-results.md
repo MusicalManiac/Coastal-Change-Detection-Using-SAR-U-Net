@@ -1,6 +1,6 @@
 # NZ external testing results: Dovi, Ruby and Gretel
 
-Prepared 12 October 2026 from the three `prediction_preview.png` images and three `run_info.json` files supplied in `Testing1.zip`.
+Prepared 12 October 2026 from the three `prediction_preview.png` images and three `run_info.json` files supplied in `Testing1.zip`. The previews are in the repository as [`docs/figures/nz_cyclones_preview_runA.png`](figures/nz_cyclones_preview_runA.png) (all three events) and [`docs/figures/nz_gretel_preview_runA.png`](figures/nz_gretel_preview_runA.png) (Gretel). All three tests used Run A (epoch 38).
 
 ## What we tested
 
