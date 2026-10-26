@@ -68,8 +68,9 @@ Three evaluation workflows are included:
 2. **Cyclone Gabrielle against the Hawke's Bay Regional Council flood extent**  
    The full Gabrielle scene is compared with HBRC's mapped maximum flood
    extent (13–15 February 2023) in `notebooks/nzdf_flood_product.ipynb`,
-   which also produces the road-impact analysis. The HBRC layer itself is not
-   stored in the repo.
+   which also produces the road-impact analysis. That notebook holds the Run B
+   outputs; the Run A run is recorded in `notebooks/nzdf_flood_product_runA.ipynb`.
+   The HBRC layer itself is not stored in the repo.
 
 3. **Other New Zealand cyclones (Dovi, Ruby, Gretel)**  
    Prediction-only tests with no independent reference maps, so only the
@@ -100,7 +101,8 @@ Coastal-Change-Detection-Using-SAR-U-Net/
 │   ├── unet_training_40epoch.ipynb   # Run A (committed checkpoint)
 │   ├── unet_training.ipynb           # Run B (60 epochs)
 │   ├── encoder_comparison.ipynb      # ResNet-18 / ResNet-34 / EfficientNet-B2
-│   ├── nzdf_flood_product.ipynb      # Full-scene map, roads, HBRC validation
+│   ├── nzdf_flood_product.ipynb      # Full-scene map, roads, HBRC validation (Run B)
+│   ├── nzdf_flood_product_runA.ipynb # Same, run with Run A in Colab (no roads)
 │   ├── gabrielle_map.ipynb           # HBRC comparison map
 │   ├── study_area_map.ipynb          # Study-area map
 │   ├── idai_reference.ipynb          # EMSR348 reference data (Idai)

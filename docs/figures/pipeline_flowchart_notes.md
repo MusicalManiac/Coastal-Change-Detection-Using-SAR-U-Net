@@ -59,7 +59,7 @@ Full data references (APA 7): `docs/data-sources.md`.
 |---|---|
 | Test patches (rule check) | The 129 held-out Gabrielle test patches scored against the rule labels. Run A IoU 0.927; Run B IoU 0.947. Baselines on the same patches: the rule without the JRC water mask (IoU 0.570) and an Otsu threshold on post-event VV (IoU 0.050). Measures agreement with the rule labels, not flood-mapping accuracy. |
 | HBRC | Hawke's Bay Regional Council Cyclone Gabrielle flood extent: maximum extent over 13–15 Feb 2023 from photos, video, satellite imagery, building inspections and ground contours. Independent of the radar labels. |
-| Full scene vs HBRC | Whole-scene prediction with 50% overlapping tiles (blended), scored over all valid pixels. Run B: IoU 0.23, precision 0.93, recall 0.24, F1 0.38; the rule alone: IoU 0.231. (`notebooks/nzdf_flood_product.ipynb`, `docs/Results & Findings Summary.md`) **Run B only** so far: a Run A run depends on the HBRC reference file being available (see below). |
+| Full scene vs HBRC | Whole-scene prediction with 50% overlapping tiles (blended), scored over all valid pixels. Scored area 2,877 km², of which HBRC marks 149.2 km² as flooded. Run A: IoU 0.241, precision 0.945, recall 0.244, F1 0.388. Run B: IoU 0.232, precision 0.930, recall 0.237, F1 0.377. The rule alone: IoU 0.231 in both runs (same reference and scoring area). Run B also has a test-blocks-only score (IoU 0.325); Run A does not, because the test-block list (`dataset_patches/dataset_info.json`) is not in the repo. (Run A: `notebooks/nzdf_flood_product_runA.ipynb`; Run B: `notebooks/nzdf_flood_product.ipynb`, `docs/Results & Findings Summary.md`) |
 | Apply trained models | Models applied to the new events without retraining. Idai: both runs. NZ cyclones: Run A only. |
 | Align map | `src/align_reference.py` puts the WFP/HDX map (about 95 m) on the exact Sentinel-1 grid. Unmapped areas are treated as not flooded. |
 | WFP/HDX map | WFP satellite-detected waters for Idai: maximum extent 12–21 Mar 2019, itself derived from Sentinel-1. Includes permanent water. |
@@ -92,14 +92,12 @@ Full data references (APA 7): `docs/data-sources.md`.
 
 ## Shared numbers (26 Oct 2026)
 
-Pending items (update this file when they arrive):
-- **HBRC with Run A:** depends on the HBRC reference file being available. If not, HBRC remains Run B only.
-
 | Test | Run A (epoch 38, t = 0.5) | Run B (epoch 51, t = 0.30) |
 |---|---|---|
 | Gabrielle test patches vs rule labels | IoU 0.927 | IoU 0.947 |
-| Gabrielle full scene vs HBRC | pending (needs HBRC file) | IoU 0.23, P 0.93, R 0.24, F1 0.38 |
+| Gabrielle full scene vs HBRC | IoU 0.241, F1 0.388, P 0.945, R 0.244 | IoU 0.232, F1 0.377, P 0.930, R 0.237 |
+| HBRC flooding detected / missed / false alarm outside the reference | 36.4 / 112.8 / 2.1 km² | 35.3 / 113.9 / 2.6 km² |
 | Idai vs WFP/HDX (pooled) | IoU 0.366, F1 0.535, P 0.580, R 0.497 | IoU 0.353, F1 0.522, P 0.558, R 0.490 |
 | NZ cyclones (flagged area) | Dovi 0.48%, Ruby 0.31%, Gretel 4.41% | not run |
 
-Update this table when the reruns are in.
+The NZ cyclones were run with Run A only.
