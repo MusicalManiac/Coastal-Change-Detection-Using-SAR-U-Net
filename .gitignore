@@ -9,7 +9,7 @@ models/outputs
 models/__pycache__/encoder_comparison.cpython-311.pyc
 
 # Figures
-figures
+/figures
 
 # Local data and generated artifacts
 data/raw/*.tif
